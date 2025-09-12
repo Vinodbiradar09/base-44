@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 import { FirstMessage } from "@/app/types/addMessage";
 import { contentZod } from "@/app/schemas/messageZod";
 
-export async function POST(req : NextRequest) {
+export async function POST(req : NextRequest) : Promise<NextResponse> {
     try {
         await connectDB();
         const session = await auth.api.getSession({

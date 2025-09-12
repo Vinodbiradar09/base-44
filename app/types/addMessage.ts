@@ -11,3 +11,7 @@ export interface FirstMessage {
     content : string,
     chatId?: string | mongoose.Types.ObjectId,
 }
+
+export interface ContentMessage {
+    content : string,
+}
