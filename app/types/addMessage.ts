@@ -15,3 +15,7 @@ export interface FirstMessage {
 export interface ContentMessage {
     content : string,
 }
+
+export interface TitleMessage {
+    title : string,
+}

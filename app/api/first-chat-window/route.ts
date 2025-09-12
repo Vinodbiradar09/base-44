@@ -6,6 +6,7 @@ import {auth} from "@/lib/auth";
 import { headers } from "next/headers";
 import { FirstMessage } from "@/app/types/addMessage";
 import { contentZod } from "@/app/schemas/messageZod";
+import { Chat } from "@/app/model/Chat";
 
 export async function POST(req : NextRequest) : Promise<NextResponse> {
     try {
@@ -50,6 +51,13 @@ export async function POST(req : NextRequest) : Promise<NextResponse> {
             messages.push(assistantMsg);
         } else {
             chat = {_id : chatId};
+            const c = await Chat.findOne({_id : chatId , userId : id});
+            if(c?.messageCount === 20){
+                return NextResponse.json({
+                    message : "your chat window is full please select new one",
+                    success : false,
+                },{status : 400})
+            }
             const userMsg = await addMessage({chatId, userId : id , role : "user" , content});
             messages.push(userMsg);
 

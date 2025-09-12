@@ -6,7 +6,7 @@ import {auth} from "@/lib/auth";
 import { headers } from "next/headers";
 import { ContentMessage } from "@/app/types/addMessage";
 
-export async function PATCH(req : NextRequest , {params} : {params : Promise<{slug : string}>}) : Promise<NextResponse> {
+export async function PATCH(req : NextRequest , {params} : {params : Promise<{chatId : string; messageId : string}>}) : Promise<NextResponse> {
     try {
         await connectDB();
         const session = await auth.api.getSession({
@@ -30,19 +30,33 @@ export async function PATCH(req : NextRequest , {params} : {params : Promise<{sl
                 },{status : 400}
             )
         }
-        const {slug} = await params;
-        if(!slug){
+        const {chatId , messageId} = await params;
+        if(!chatId || !messageId){
             return NextResponse.json(
                 {
-                    message : "slug is required to edit message",
+                    message : "chat id and message id is required to edit message",
                     success : false
                 },{status : 400}
             )
         }
         const id = session.user.id;
+        const chat = await Chat.findOne({userId : id , _id : chatId});
+        if(!chat){
+            return NextResponse.json({
+                message : "chat not found",
+                success : false,
+            },{status : 400})
+        }
+        if(chat.messageCount === 20){
+             return NextResponse.json({
+                message : "chat is full please select new one",
+                success : false,
+            },{status : 400})
+        }
         const message = await Message.findOne({
             userId : id,
-            _id : slug
+            _id : messageId,
+            chatId : chatId,
         });
         if(!message){
             return NextResponse.json(
@@ -52,11 +66,15 @@ export async function PATCH(req : NextRequest , {params} : {params : Promise<{sl
                 },{status : 400}
             )
         }
-        const editedMessage = await Message.findByIdAndUpdate(slug , {
+        const editedMessage = await Message.findOneAndUpdate({
+            _id : messageId,
+            userId : id,
+            chatId : chatId,
+        }, {
             $set : {
-                content,
+                content : content,
             }
-        },{new : true , runValidators : true});
+        },{new : true , runValidators : true})
         if(!editedMessage){
              return NextResponse.json(
                 {
