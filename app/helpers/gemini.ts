@@ -19,7 +19,7 @@ export async function gemini_response(code : string , onChunk : (chunk : string)
             temperature : 0.1,
             topP : 0.8,
             topK : 40,
-            maxOutputTokens : 10000,
+            maxOutputTokens : 12000,
         }
     })
     let fullResponse = '';

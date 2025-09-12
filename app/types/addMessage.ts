@@ -19,3 +19,22 @@ export interface ContentMessage {
 export interface TitleMessage {
     title : string,
 }
+
+export interface Message {
+  _id: string;
+  chatId: string;
+  userId: string;
+  role: "user" | "assistant";
+  content: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface Chat {
+  _id: string;
+  userId: string;
+  title: string;
+  messageCount: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
