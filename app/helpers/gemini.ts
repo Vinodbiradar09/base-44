@@ -2,12 +2,23 @@ import {GoogleGenAI} from "@google/genai";
 import { systemPrompt } from "./prompt";
 const apiKey = process.env.GEMINI_API_KEY;
 
+if (!apiKey) {
+  throw new Error("GEMINI_API_KEY is not set in environment variables");
+}
+
 const ai = new GoogleGenAI({apiKey});
 
-export async function gemini_response(code : string , onChunk : (chunk : string)=> void) {
+export async function gemini_response(code : string , onChunk : (chunk : string)=> void) : Promise<string> {
    try {
-     if (code.length > 500000) {
-      throw new Error('Code is too long. Please provide code under 500,000 characters.');
+    if (typeof code !== "string") {
+      throw new Error("Code must be a string");
+    }
+    code = code.trim();
+    if (!code || code.length === 0) {
+      throw new Error("Code is required for optimization");
+    }
+    if (code.length > 500000) {
+      throw new Error("Code is too long. Please provide code under 500,000 characters.");
     }
 
      const prompt = `${systemPrompt}\n\nCode to optimize and scale:\n\`\`\`\n${code}\n\`\`\``;
