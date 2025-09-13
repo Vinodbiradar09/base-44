@@ -117,6 +117,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             success: true,
             chat,
             messages,
+            chatId : chat._id,
           });
           controller.enqueue(encoder.encode(`data: ${metadata}\n\n`));
           controller.close();

@@ -1,8 +1,8 @@
-import { connectDB } from "@/app/lib/db";
+import { getDb } from "@/app/lib/dbBetter";
 import {betterAuth , BetterAuthOptions} from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 
-const db = await connectDB();
+const db = await getDb();
 export const auth = betterAuth({
     secret : process.env.BETTER_AUTH_SECRET!,
     baseURL : process.env.NEXT_PUBLIC_APP_URL!,

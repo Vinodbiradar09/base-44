@@ -1,7 +1,7 @@
 "use client";
-import { authClient } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
 import React from "react";
-
+import { authClient } from '@/lib/auth-client';
 
 const SignIn = ()=>{
     const SignInWithGoogle = async ()=>{
@@ -20,10 +20,10 @@ const SignIn = ()=>{
 
     return (
         <div className="flex items-center justify-center">
-            <button onClick={SignInWithGoogle}>Sign In With Google</button>
+            <Button onClick={SignInWithGoogle}>Sign In With Google</Button>
             <br/>
              <br/>
-            <button onClick={SignInWithGitHub}>Sign In With Github</button>
+            <Button onClick={SignInWithGitHub}>Sign In With Github</Button>
         </div>
     )
 }
