@@ -1,3 +1,4 @@
+export const runtime = "nodejs";
 import { Chat as ChatModel } from "../model/Chat";
 import { Message as MessageModel } from "../model/Messages";
 import { connectDB } from "../lib/db";

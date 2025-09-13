@@ -1,14 +1,12 @@
+import { connectDB } from "@/app/lib/db";
 import {betterAuth , BetterAuthOptions} from "better-auth";
-import {MongoClient} from "mongodb";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 
+const db = await connectDB();
 export const auth = betterAuth({
     secret : process.env.BETTER_AUTH_SECRET!,
     baseURL : process.env.NEXT_PUBLIC_APP_URL!,
-    database : {
-        type: "mongodb",
-        uri : process.env.MONGODB_URI!,
-    },
+    database : mongodbAdapter(db),
     socialProviders : {
         google : {
             clientId : process.env.GOOGLE_CLIENT_ID as string,

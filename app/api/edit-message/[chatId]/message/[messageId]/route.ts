@@ -1,3 +1,4 @@
+export const runtime = "nodejs";
 import { NextResponse , NextRequest } from "next/server";
 import { Chat } from "@/app/model/Chat";
 import { Message } from "@/app/model/Messages";

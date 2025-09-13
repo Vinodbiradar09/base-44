@@ -1,3 +1,4 @@
+export const runtime = "nodejs";
 import { connectDB } from "@/app/lib/db";
 import { Chat } from "@/app/model/Chat";
 import { NextRequest , NextResponse } from "next/server";

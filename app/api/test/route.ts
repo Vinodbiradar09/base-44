@@ -1,3 +1,4 @@
+export const runtime = "nodejs";
 import { gemini_response } from "@/app/helpers/gemini";
 import { NextRequest , NextResponse } from "next/server";
 
