@@ -8,6 +8,7 @@ import { headers } from "next/headers";
 import { FirstMessage, Message, Chat } from "@/app/types/addMessage";
 import { contentZod } from "@/app/schemas/messageZod";
 import { Chat as ChatModel } from "@/app/model/Chat";
+import { GeminiResponse } from "@/app/types/Api";
 
 const encoder = new TextEncoder();
 
@@ -96,7 +97,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          await gemini_response(content.trim(), (chunk) => {
+        const parsedSections = await gemini_response(content.trim(), (chunk) => {
             optimizedResponse += chunk;
             if (optimizedResponse.length > 1000000) {
               throw new Error("Response size exceeds 1MB limit");
@@ -112,11 +113,19 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           });
           messages.push(assistantMsg);
 
+          const finalData : GeminiResponse = {
+              optimizedCode : parsedSections.optimizedCode,
+              issuesAndFixes : parsedSections.issuesAndFixes,
+              performanceMetrics : parsedSections.performanceMetrics,
+              scalingArchitecture : parsedSections.scalingArchitecture,
+              implementationRoadmap : parsedSections.implementationRoadmap,
+              productionDeployment : parsedSections.productionDeployment,
+          }
+
           const metadata = JSON.stringify({
             message: "Successfully created context chat window for chat",
             success: true,
-            chat,
-            messages,
+            sections : finalData,
             chatId : chat._id,
           });
           controller.enqueue(encoder.encode(`data: ${metadata}\n\n`));
