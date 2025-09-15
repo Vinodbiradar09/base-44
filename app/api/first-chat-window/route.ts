@@ -8,7 +8,7 @@ import { headers } from "next/headers";
 import { FirstMessage, Message, Chat } from "@/app/types/addMessage";
 import { contentZod } from "@/app/schemas/messageZod";
 import { Chat as ChatModel } from "@/app/model/Chat";
-import { GeminiResponse } from "@/app/types/Api";
+import { Message as MessageModel } from "@/app/model/Messages" 
 
 const encoder = new TextEncoder();
 
@@ -45,18 +45,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     let chat: Chat;
-    const messages: Message[] = []; 
     let optimizedResponse = "";
 
     if (!chatId) {
       chat = await createChat(userId, content);
-      const userMsg = await addMessage({
-        chatId: chat._id,
-        userId,
-        role: "user",
-        content,
-      });
-      messages.push(userMsg);
     } else {
       const existingChat = await ChatModel.findOne({ _id: chatId, userId });
       if (!existingChat) {
@@ -85,48 +77,36 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         createdAt: existingChat.createdAt,
         updatedAt: existingChat.updatedAt,
       };
-      const userMsg = await addMessage({
-        chatId,
-        userId,
-        role: "user",
-        content,
-      });
-      messages.push(userMsg);
     }
+
+    await addMessage({
+      chatId: chat._id,
+      userId,
+      role: "user",
+      content: content.trim(),
+    });
 
     const stream = new ReadableStream({
       async start(controller) {
         try {
-        const parsedSections = await gemini_response(content.trim(), (chunk) => {
+          await gemini_response(content.trim(), (chunk) => {
             optimizedResponse += chunk;
             if (optimizedResponse.length > 1000000) {
               throw new Error("Response size exceeds 1MB limit");
             }
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
           });
-
-          const assistantMsg = await addMessage({
+          await addMessage({
             chatId: chat._id,
             userId,
             role: "assistant",
             content: optimizedResponse,
           });
-          messages.push(assistantMsg);
-
-          const finalData : GeminiResponse = {
-              optimizedCode : parsedSections.optimizedCode,
-              issuesAndFixes : parsedSections.issuesAndFixes,
-              performanceMetrics : parsedSections.performanceMetrics,
-              scalingArchitecture : parsedSections.scalingArchitecture,
-              implementationRoadmap : parsedSections.implementationRoadmap,
-              productionDeployment : parsedSections.productionDeployment,
-          }
 
           const metadata = JSON.stringify({
             message: "Successfully created context chat window for chat",
             success: true,
-            sections : finalData,
-            chatId : chat._id,
+            chatId: chat._id,
           });
           controller.enqueue(encoder.encode(`data: ${metadata}\n\n`));
           controller.close();
@@ -149,6 +129,66 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       {
         success: false,
         message: `Error in creating the context chat window: ${error}`,
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(req: NextRequest): Promise<NextResponse> {
+  try {
+    await connectDB();
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user.email) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized User, please login",
+        },
+        { status: 401 }
+      );
+    }
+
+    const userId = session.user.id;
+    const url = new URL(req.url);
+    const chatId = url.searchParams.get("chatId");
+
+    if (!chatId) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "chatId is required",
+        },
+        { status: 400 }
+      );
+    }
+
+    const chat = await ChatModel.findOne({ _id: chatId, userId });
+    if (!chat) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Chat not found or you don't have access",
+        },
+        { status: 404 }
+      );
+    }
+
+    const messages = await MessageModel.find({ chatId }).sort({ createdAt: 1 }).select("role content");
+
+    return NextResponse.json({
+      success: true,
+      messages,
+    });
+  } catch (error) {
+    console.error("Error in GET /api/first-chat-window:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: `Error fetching messages: ${error}`,
       },
       { status: 500 }
     );

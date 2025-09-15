@@ -1,6 +1,5 @@
 import {GoogleGenAI} from "@google/genai";
 import { systemPrompt } from "./prompt";
-import { geminiParserResponse, ParsedGeminiResponse } from "./responseParser";
 const apiKey = process.env.GEMINI_API_KEY;
 
 if (!apiKey) {
@@ -9,7 +8,7 @@ if (!apiKey) {
 
 const ai = new GoogleGenAI({apiKey});
 
-export async function gemini_response(code : string , onChunk : (chunk : string)=> void) : Promise<ParsedGeminiResponse> {
+export async function gemini_response(code : string , onChunk : (chunk : string)=> void) : Promise<string> {
    try {
     if (typeof code !== "string") {
       throw new Error("Code must be a string");
@@ -31,7 +30,7 @@ export async function gemini_response(code : string , onChunk : (chunk : string)
             temperature : 0.1,
             topP : 0.8,
             topK : 40,
-            maxOutputTokens : 12000,
+            maxOutputTokens : 32000,
         }
     })
     let fullResponse = '';
@@ -48,9 +47,7 @@ export async function gemini_response(code : string , onChunk : (chunk : string)
      if (fullResponse.trim().length === 0) {
       throw new Error('Empty response from Gemini');
     }
-    // console.log("full response" , fullResponse);
-    const parsedResponse = geminiParserResponse(fullResponse);
-    return parsedResponse;
+    return fullResponse;
    } catch (error) {
         console.log("Error while gemini streaming" , error);
         throw new Error("Gemini streaming error");

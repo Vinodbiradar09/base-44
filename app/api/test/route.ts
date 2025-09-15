@@ -23,7 +23,6 @@ export async function POST(req : NextRequest) {
             {
                 message : "generated gemini res",
                 success : true,
-                optimized,
                 response,
             }
         )
