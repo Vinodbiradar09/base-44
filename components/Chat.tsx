@@ -58,25 +58,23 @@ export default function ChatBox() {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const chatRef = useRef<HTMLDivElement>(null);
 
-
+  
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedChatId = localStorage.getItem('chatId') || "";
-      setChatId(storedChatId);
-      if (storedChatId) {
-        fetchMessages();
-      }
+    if (typeof window === 'undefined') return; 
+    const storedChatId = localStorage.getItem('chatId') || "";
+    setChatId(storedChatId);
+    if (storedChatId) {
+      fetchMessages();
     }
   }, []);
 
   
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (chatId) {
-        localStorage.setItem('chatId', chatId);
-      } else {
-        localStorage.removeItem('chatId');
-      }
+    if (typeof window === 'undefined') return; 
+    if (chatId) {
+      localStorage.setItem('chatId', chatId);
+    } else {
+      localStorage.removeItem('chatId');
     }
   }, [chatId]);
 
@@ -117,6 +115,7 @@ export default function ChatBox() {
   };
 
   const copyToClipboard = (text: string, index: number) => {
+    if (typeof window === 'undefined') return; 
     navigator.clipboard.writeText(text)
       .then(() => {
         setCopiedIndex(index);
