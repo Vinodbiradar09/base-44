@@ -52,21 +52,35 @@ function parseContent(content: string): MessagePart[] {
 export default function ChatBox() {
   const [content, setContent] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [chatId, setChatId] = useState<string>(typeof window !== 'undefined' ? localStorage.getItem('chatId') || "" : "");
+  const [chatId, setChatId] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const chatRef = useRef<HTMLDivElement>(null);
 
+
   useEffect(() => {
-    if (chatId) {
-      fetchMessages();
-      localStorage.setItem('chatId', chatId);
-    } else {
-      localStorage.removeItem('chatId');
+    if (typeof window !== 'undefined') {
+      const storedChatId = localStorage.getItem('chatId') || "";
+      setChatId(storedChatId);
+      if (storedChatId) {
+        fetchMessages();
+      }
+    }
+  }, []);
+
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (chatId) {
+        localStorage.setItem('chatId', chatId);
+      } else {
+        localStorage.removeItem('chatId');
+      }
     }
   }, [chatId]);
 
+  
   useEffect(() => {
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
