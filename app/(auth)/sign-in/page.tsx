@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -7,8 +8,12 @@ import React from "react";
 import { FcGoogle } from "react-icons/fc";
 import { authClient } from "@/lib/auth-client";
 
+
+export const dynamic = "force-dynamic";
+
 const SignIn = () => {
   const SignInWithGoogle = async () => {
+    if (typeof window === 'undefined') return; 
     await authClient.signIn.social({
       provider: "google",
       callbackURL: "/chat-page",
@@ -16,12 +21,12 @@ const SignIn = () => {
   };
 
   const SignInWithGitHub = async () => {
+    if (typeof window === 'undefined') return; 
     await authClient.signIn.social({
       provider: "github",
       callbackURL: "/chat-page",
     });
   };
-
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -41,12 +46,11 @@ const SignIn = () => {
       opacity: 1,
       transition: {
         duration: 0.8,
-        ease: [0.6, -0.05, 0.01, 0.99], 
+        ease: [0.6, -0.05, 0.01, 0.99],
       },
     },
   };
 
- 
   const buttonVariants: Variants = {
     initial: { scale: 1, boxShadow: "0 0 0 rgba(255, 255, 255, 0)" },
     hover: {
@@ -68,7 +72,6 @@ const SignIn = () => {
       initial="hidden"
       animate="visible"
     >
-    
       <motion.div variants={itemVariants} className="mb-12">
         <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-300 to-gray-500 bg-clip-text text-transparent mb-4">
           base44
@@ -76,12 +79,10 @@ const SignIn = () => {
         <p className="text-xl text-gray-400 text-center">Sign in to base44</p>
       </motion.div>
 
-   
       <motion.div
         className="flex flex-col gap-6 w-full max-w-md"
         variants={itemVariants}
       >
-     
         <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap" initial="initial">
           <Button
             onClick={SignInWithGoogle}
@@ -92,14 +93,12 @@ const SignIn = () => {
           </Button>
         </motion.div>
 
-      
         <div className="flex items-center justify-center">
           <div className="w-full h-px bg-gray-700 mx-4"></div>
           <span className="text-gray-500 px-4 text-sm">or</span>
           <div className="w-full h-px bg-gray-700 mx-4"></div>
         </div>
 
-      
         <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap" initial="initial">
           <Button
             onClick={SignInWithGitHub}
@@ -111,7 +110,6 @@ const SignIn = () => {
         </motion.div>
       </motion.div>
 
-
       <motion.p
         className="mt-12 text-xs text-gray-600 text-center"
         variants={itemVariants}
@@ -119,7 +117,6 @@ const SignIn = () => {
         Secure authentication powered by Better-Auth
       </motion.p>
 
-     
       <motion.div
         className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-r from-gray-900 to-transparent rounded-full opacity-20"
         animate={{ rotate: 360 }}

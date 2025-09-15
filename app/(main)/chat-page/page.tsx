@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import ChatBox from '@/components/Chat';
 import { useRouter } from "next/navigation";
 import { authClient, ClientSession } from '@/lib/auth-client';
+
 export const dynamic = "force-dynamic";
 
 const ChatPage = () => {

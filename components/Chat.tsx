@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Send, Plus, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,33 +59,7 @@ export default function ChatBox() {
   const chatRef = useRef<HTMLDivElement>(null);
 
   
-  useEffect(() => {
-    if (typeof window === 'undefined') return; 
-    const storedChatId = localStorage.getItem('chatId') || "";
-    setChatId(storedChatId);
-    if (storedChatId) {
-      fetchMessages();
-    }
-  }, []);
-
-  
-  useEffect(() => {
-    if (typeof window === 'undefined') return; 
-    if (chatId) {
-      localStorage.setItem('chatId', chatId);
-    } else {
-      localStorage.removeItem('chatId');
-    }
-  }, [chatId]);
-
-  
-  useEffect(() => {
-    if (chatRef.current) {
-      chatRef.current.scrollTop = chatRef.current.scrollHeight;
-    }
-  }, [messages]);
-
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -105,7 +79,31 @@ export default function ChatBox() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [chatId]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return; 
+    const storedChatId = localStorage.getItem('chatId') || "";
+    setChatId(storedChatId);
+    if (storedChatId) {
+      fetchMessages();
+    }
+  }, [fetchMessages]); 
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return; 
+    if (chatId) {
+      localStorage.setItem('chatId', chatId);
+    } else {
+      localStorage.removeItem('chatId');
+    }
+  }, [chatId]);
+
+  useEffect(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const handleNewChat = () => {
     setChatId("");
@@ -190,9 +188,9 @@ export default function ChatBox() {
         newMsgs[assistantIndex].parts = parseContent(currentResponse);
         return newMsgs;
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error streaming response:", err);
-      setError("Failed to fetch response");
+      setError(err.message || "Failed to fetch response");
       setMessages((prev) => prev.slice(0, -2));
     } finally {
       setLoading(false);
