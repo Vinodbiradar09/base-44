@@ -5,7 +5,7 @@ import { gemini_response } from "@/app/helpers/gemini";
 import { createChat, addMessage } from "@/app/helpers/firstChat";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { FirstMessage, Message, Chat } from "@/app/types/addMessage";
+import { FirstMessage, Chat } from "@/app/types/addMessage";
 import { contentZod } from "@/app/schemas/messageZod";
 import { Chat as ChatModel } from "@/app/model/Chat";
 import { Message as MessageModel } from "@/app/model/Messages" 

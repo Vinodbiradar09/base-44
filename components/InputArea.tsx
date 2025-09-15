@@ -19,7 +19,7 @@ export const InputArea: React.FC<InputAreaProps> = ({ value, onChange, onSend })
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = 'auto';
-      textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px'; // Max height 200px, scroll if more
+      textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px'; 
     }
   }, [value]);
 

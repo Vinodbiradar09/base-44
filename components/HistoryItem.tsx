@@ -57,7 +57,6 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({ history, onDelete, onR
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Title/Editable Input */}
       {isEditing ? (
         <Input
           value={editTitle}

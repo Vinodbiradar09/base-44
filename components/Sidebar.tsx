@@ -30,7 +30,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   return (
     <div className={`flex flex-col h-full ${!isOpen ? 'hidden' : ''}`}>
-      {/* Header with Icon and Close */}
+   
       <div className="flex items-center justify-between p-4 border-b border-gray-700">
         <motion.div
           className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center"
@@ -38,7 +38,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           whileTap={{ scale: 0.95 }}
           aria-label="Grok-like AI Icon"
         >
-          <span className="text-white text-sm font-bold">AI</span> {/* Replace with funky SVG/icon */}
+          <span className="text-white text-sm font-bold">AI</span> 
         </motion.div>
         <Button
           variant="ghost"
@@ -50,7 +50,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </Button>
       </div>
 
-      {/* Search Bar */}
+  
       <div className="p-4 border-b border-gray-700">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -63,7 +63,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      {/* History List */}
+   
       <div className="flex-1 overflow-y-auto p-2">
         <HistoryList
           histories={histories}
@@ -72,7 +72,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         />
       </div>
 
-      {/* New Chat Button */}
+    
       <div className="p-4 border-t border-gray-700">
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <Button

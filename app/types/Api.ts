@@ -13,6 +13,5 @@ export interface GeminiResponse{
 export interface API {
     success : boolean,
     message : string,
-    sections?: GeminiResponse,
     chatId?: mongoose.Types.ObjectId | string,
 }

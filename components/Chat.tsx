@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -23,7 +22,6 @@ function parseContent(content: string): MessagePart[] {
   let match;
 
   while ((match = regex.exec(content)) !== null) {
-   
     if (match.index > lastIndex) {
       parts.push({
         type: "text",
@@ -34,9 +32,9 @@ function parseContent(content: string): MessagePart[] {
       type: "code",
       content: match[2],
     });
-
     lastIndex = regex.lastIndex;
   }
+
   if (lastIndex < content.length) {
     parts.push({
       type: "text",
@@ -57,6 +55,7 @@ export default function ChatBox() {
   const [chatId, setChatId] = useState<string>(typeof window !== 'undefined' ? localStorage.getItem('chatId') || "" : "");
   const [error, setError] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const chatRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -103,15 +102,19 @@ export default function ChatBox() {
     setContent("");
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).catch(err => console.error("Failed to copy: ", err));
+  const copyToClipboard = (text: string, index: number) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        setCopiedIndex(index);
+        setTimeout(() => setCopiedIndex(null), 2000);
+      })
+      .catch(err => console.error("Failed to copy: ", err));
   };
 
   const handleSubmit = async () => {
     if (!content.trim()) return;
 
     setError(null);
-
     const userMessage: ChatMessage = {
       role: "user",
       parts: [{ type: "text", content: content.trim() }],
@@ -119,6 +122,7 @@ export default function ChatBox() {
     setMessages((prev) => [...prev, userMessage]);
     setContent("");
     setLoading(true);
+
     setMessages((prev) => [...prev, { role: "assistant", parts: [] }]);
     const assistantIndex = messages.length + 1;
 
@@ -155,8 +159,7 @@ export default function ChatBox() {
           for (const line of lines) {
             const data = JSON.parse(line.replace("data: ", ""));
             if (data.chunk) {
-              const part = data.chunk;
-              currentResponse += part;
+              currentResponse += data.chunk;
               setMessages((prev) => {
                 const newMsgs = [...prev];
                 newMsgs[assistantIndex].parts = [{ type: "text", content: currentResponse }];
@@ -168,6 +171,7 @@ export default function ChatBox() {
           }
         }
       }
+
       setMessages((prev) => {
         const newMsgs = [...prev];
         newMsgs[assistantIndex].parts = parseContent(currentResponse);
@@ -183,49 +187,58 @@ export default function ChatBox() {
   };
 
   return (
-    <div className="flex flex-col h-full max-w-3xl w-full bg-black text-white border border-gray-800 rounded-lg shadow-lg overflow-hidden">
-      <div className="p-4 border-b border-gray-800 font-semibold text-lg">Chat with AI</div>
-      <div ref={chatRef} className="flex-1 overflow-y-auto p-4 space-y-6 bg-black">
+    <div className="flex flex-col h-full max-w-4xl w-full bg-[#0A0A0B] text-[#E5E7EB] border border-[#2D2D2D] rounded-xl shadow-2xl overflow-hidden">
+      <div className="p-4 border-b border-[#2D2D2D] font-semibold text-lg bg-[#0A0A0B]">
+        Hook with 44
+      </div>
+      <div ref={chatRef} className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#0A0A0B]">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`relative max-w-[80%] p-3 rounded-lg ${msg.role === "user" ? "bg-gray-800 text-white" : "bg-gray-900 text-white"}`}>
+            <div className={`relative max-w-[80%] p-4 rounded-lg ${msg.role === "user" ? "bg-[#2D2D2D] text-[#E5E7EB]" : "bg-[#1F1F1F] text-[#E5E7EB]"} shadow-md`}>
               {msg.parts.map((part, j) =>
                 part.type === "code" ? (
-                  <pre key={j} className="bg-black text-green-300 p-3 rounded-md overflow-x-auto whitespace-pre-wrap my-2">
+                  <pre key={j} className="bg-[#1A1A1A] text-[#4ADE80] p-3 rounded-md overflow-x-auto whitespace-pre-wrap my-2 font-mono text-sm">
                     <code>{part.content}</code>
                   </pre>
                 ) : (
-                  <p key={j} className="text-white whitespace-pre-wrap break-words">{part.content}</p>
+                  <p key={j} className="text-[#E5E7EB] whitespace-pre-wrap break-words">{part.content}</p>
                 )
               )}
               {msg.role === "assistant" && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute top-2 right-2 text-gray-400 hover:text-white"
-                  onClick={() => copyToClipboard(msg.parts.map(p => p.content).join('\n\n'))}
-                >
-                  <Copy size={16} />
-                </Button>
+                <div className="absolute top-2 right-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-[#6B7280] hover:text-[#E5E7EB] relative"
+                    onClick={() => copyToClipboard(msg.parts.map(p => p.content).join('\n\n'), i)}
+                  >
+                    <Copy size={16} />
+                    {copiedIndex === i && (
+                      <span className="absolute top-8 right-0 bg-[#2D2D2D] text-[#E5E7EB] text-xs px-2 py-1 rounded-md shadow">
+                        Copied!
+                      </span>
+                    )}
+                  </Button>
+                </div>
               )}
             </div>
           </div>
         ))}
-        {loading && <p className="text-gray-400 text-center">AI is thinking...</p>}
-        {error && <p className="text-red-400 text-center">{error}{error.includes("full") ? ". Click + to create a new chat." : ""}</p>}
+        {loading && <p className="text-[#6B7280] text-center">44 is cooking...</p>}
+        {error && <p className="text-[#F87171] text-center">{error}{error.includes("full") ? ". Click + to create a new chat." : ""}</p>}
       </div>
-      <div className="p-4 border-t border-gray-800 flex items-center gap-2 bg-black">
-        <Button onClick={handleNewChat} variant="ghost" size="icon" className="text-white hover:bg-gray-800">
+      <div className="p-4 border-t border-[#2D2D2D] flex items-center gap-3 bg-[#0A0A0B]">
+        <Button onClick={handleNewChat} variant="ghost" size="icon" className="text-[#E5E7EB] hover:bg-[#2D2D2D] rounded-full">
           <Plus size={20} />
         </Button>
         <Input
-          className="flex-1 bg-gray-900 text-white border-gray-800 placeholder-gray-400 focus:border-gray-600"
+          className="flex-1 bg-[#1F1F1F] text-[#E5E7EB] border-[#2D2D2D] placeholder-[#6B7280] focus:border-[#4B5563] rounded-lg"
           placeholder="Type a message..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
           disabled={loading}
         />
-        <Button onClick={handleSubmit} disabled={loading || !content.trim()} size="icon" className="bg-gray-800 text-white hover:bg-gray-700 rounded-full">
+        <Button onClick={handleSubmit} disabled={loading || !content.trim()} size="icon" className="bg-[#2D2D2D] text-[#E5E7EB] hover:bg-[#4B5563] rounded-full">
           <Send size={16} />
         </Button>
       </div>
