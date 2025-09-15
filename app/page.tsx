@@ -1,9 +1,12 @@
+
 "use client";
 
 import { motion, Variants } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import React from "react";
+import React, { useState, useEffect } from "react";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -82,13 +85,25 @@ const orbitVariants: Variants = {
 };
 
 export default function Home() {
+  const [particlePositions, setParticlePositions] = useState<Array<{ x: number; y: number }>>([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const positions = Array.from({ length: 50 }, () => ({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+      }));
+      setParticlePositions(positions);
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 md:p-8 overflow-hidden relative">
-      {/* Cyberpunk background effects with radial void and vignette */}
+     
       <div className="absolute inset-0 bg-[radial-gradient(at_center,rgba(0,0,0,1),rgba(20,20,20,0.9))] opacity-95" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" /> {/* Vignette effect */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" /> 
 
-      {/* Enhanced shadow lights with pulsing */}
+   
       <motion.div
         className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-silver/25 to-transparent rounded-full opacity-50 blur-[100px]"
         variants={shadowLightVariants}
@@ -102,19 +117,19 @@ export default function Home() {
         style={{ transformOrigin: "top right" }}
       />
 
-      {/* Unique aesthetic: Floating glitch particles (increased count for density) */}
+    
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {[...Array(50)].map((_, i) => (
+        {particlePositions.map((pos, i) => (
           <motion.div
             key={i}
             className="absolute w-1 h-1 bg-silver/30 rounded-full"
-            initial={{ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight }}
+            initial={{ x: pos.x, y: pos.y }}
             animate="animate"
             variants={particleVariants}
             transition={{ delay: Math.random() * 3, duration: 4 + Math.random() * 3 }}
           />
         ))}
-        {/* Horizontal scan lines for added retro-futuristic depth */}
+      
         <motion.div
           className="w-full h-full bg-repeating-linear-gradient(to bottom, transparent 4px, rgba(192,192,192,0.02) 4px)"
           animate={{ y: [0, -8, 0] }}
@@ -128,7 +143,7 @@ export default function Home() {
         initial="hidden"
         animate="visible"
       >
-        {/* App Name with Enhanced Glow, Scale Pulse, and Orbiting Elements */}
+    
         <motion.div className="relative">
           <motion.h1
             className="text-7xl md:text-9xl font-black bg-gradient-to-r from-silver to-gray-600 bg-clip-text text-transparent uppercase tracking-[0.1em] leading-none"
@@ -138,7 +153,7 @@ export default function Home() {
           >
             base44
           </motion.h1>
-          {/* Orbiting silver dots for unique cyber effect */}
+        
           <motion.div
             className="absolute inset-0 flex items-center justify-center"
             variants={orbitVariants}
@@ -151,7 +166,7 @@ export default function Home() {
           </motion.div>
         </motion.div>
 
-        {/* Tagline with Responsive Font Size, Allowing Two Lines on Mobile */}
+     
         <motion.p
           className="text-[2.5vw] sm:text-[2vw] md:text-[1.5vw] font-mono text-gray-100 tracking-[0.05em] uppercase italic max-w-[85vw] md:whitespace-nowrap"
           style={{ fontVariant: "full-width" }}
@@ -162,7 +177,7 @@ export default function Home() {
           credits are fucked ditch that weak-ass shits and hook up with base44
         </motion.p>
 
-        {/* Cool Button with Explosive Hover, No Rounded Corners */}
+     
         <motion.div variants={itemVariants}>
           <Link href="/sign-in">
             <motion.div variants={buttonVariants} initial="initial" whileHover="hover" whileTap="tap">
@@ -174,7 +189,7 @@ export default function Home() {
         </motion.div>
       </motion.div>
 
-      {/* Fixed Footer: Simpler, centered, with subtle glow */}
+    
       <motion.footer
         className="absolute bottom-4 text-gray-400 text-sm font-mono uppercase tracking-wide z-10"
         variants={itemVariants}

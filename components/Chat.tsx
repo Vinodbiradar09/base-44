@@ -59,7 +59,7 @@ export default function ChatBox() {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const chatRef = useRef<HTMLDivElement>(null);
 
-  // Memoize fetchMessages to make it stable
+
   const fetchMessages = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -82,9 +82,9 @@ export default function ChatBox() {
     }
   }, [chatId]);
 
-  // Initialize chatId from localStorage only in the browser
+
   useEffect(() => {
-    if (typeof window === 'undefined') return; // Skip on server
+    if (typeof window === 'undefined') return; 
     const storedChatId = localStorage.getItem('chatId') || "";
     setChatId(storedChatId);
     if (storedChatId) {
@@ -92,9 +92,9 @@ export default function ChatBox() {
     }
   }, [fetchMessages]);
 
-  // Update localStorage when chatId changes
+
   useEffect(() => {
-    if (typeof window === 'undefined') return; // Skip on server
+    if (typeof window === 'undefined') return; 
     if (chatId) {
       localStorage.setItem('chatId', chatId);
     } else {
@@ -102,7 +102,7 @@ export default function ChatBox() {
     }
   }, [chatId]);
 
-  // Auto-scroll to bottom when messages change
+  
   useEffect(() => {
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
@@ -117,7 +117,7 @@ export default function ChatBox() {
   };
 
   const copyToClipboard = (text: string, index: number) => {
-    if (typeof window === 'undefined') return; // Skip on server
+    if (typeof window === 'undefined') return;
     navigator.clipboard.writeText(text)
       .then(() => {
         setCopiedIndex(index);
