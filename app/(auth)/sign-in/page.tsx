@@ -21,7 +21,7 @@ const SignIn = () => {
   };
 
   const SignInWithGitHub = async () => {
-    if (typeof window === 'undefined') return; 
+    if (typeof window === 'undefined') return;
     await authClient.signIn.social({
       provider: "github",
       callbackURL: "/chat-page",
