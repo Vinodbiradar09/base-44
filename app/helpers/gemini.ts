@@ -24,7 +24,7 @@ export async function gemini_response(code : string , onChunk : (chunk : string)
      const prompt = `${systemPrompt}\n\nCode to optimize and scale:\n\`\`\`\n${code}\n\`\`\``;
 
      const response = await ai.models.generateContentStream({
-        model : "gemini-2.5-pro",
+        model: "gemini-2.5-flash",
         contents : prompt,
         config : {
             temperature : 0.1,
