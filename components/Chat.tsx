@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Send, Plus, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 
 type MessagePart = {
   type: "text" | "code";
@@ -51,6 +51,48 @@ function parseContent(content: string): MessagePart[] {
   return parts.filter(part => part.content.trim() !== '');
 }
 
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const messageVariants: Variants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+      ease: [0.6, -0.05, 0.01, 0.99],
+    },
+  },
+};
+
+const buttonVariants: Variants = {
+  initial: { scale: 1, boxShadow: "0 0 0 rgba(255, 255, 255, 0)" },
+  hover: {
+    scale: 1.1,
+    boxShadow: "0 0 10px rgba(255, 255, 255, 0.2)",
+    transition: { duration: 0.3, type: "spring", stiffness: 150 },
+  },
+  tap: { scale: 0.9 },
+};
+
+const textareaVariants: Variants = {
+  initial: { scale: 1, boxShadow: "0 0 0 rgba(255, 255, 255, 0)" },
+  focus: {
+    scale: 1.02,
+    boxShadow: "0 0 10px rgba(255, 255, 255, 0.1)",
+    transition: { duration: 0.3 },
+  },
+};
+
 export default function ChatBox() {
   const [content, setContent] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -83,24 +125,23 @@ export default function ChatBox() {
     }
   }, [chatId]);
 
-  // Load chatId from localStorage on mount
+ 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
     const storedChatId = localStorage.getItem('chatId') || "";
     setChatId(storedChatId);
   }, []);
 
-  // Fetch messages when chatId changes and is not empty
+ 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
     if (chatId) {
       fetchMessages();
+    } else {
+      setMessages([]);
     }
   }, [chatId, fetchMessages]);
 
-  // Save chatId to localStorage when it changes
+ 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
     if (chatId) {
       localStorage.setItem('chatId', chatId);
     } else {
@@ -108,20 +149,12 @@ export default function ChatBox() {
     }
   }, [chatId]);
 
-  // Auto-scroll to bottom when messages change
+ 
   useEffect(() => {
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }
   }, [messages]);
-
-  // Auto-resize textarea
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  }, [content]);
 
   const handleNewChat = () => {
     setChatId("");
@@ -222,23 +255,21 @@ export default function ChatBox() {
   };
 
   return (
-    <motion.div 
+    <motion.div
       className="flex flex-col h-full max-w-4xl w-full bg-[#0A0A0B] text-[#E5E7EB] border border-[#2D2D2D] rounded-xl shadow-2xl overflow-hidden"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
     >
       <div className="p-4 border-b border-[#2D2D2D] font-semibold text-lg bg-[#0A0A0B]">
         Hook with 44
       </div>
       <div ref={chatRef} className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#0A0A0B]">
         {messages.map((msg, i) => (
-          <motion.div 
-            key={i} 
+          <motion.div
+            key={i}
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-            initial={{ opacity: 0, x: msg.role === "user" ? 20 : -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
+            variants={messageVariants}
           >
             <div className={`relative max-w-[80%] p-4 rounded-lg ${msg.role === "user" ? "bg-[#2D2D2D] text-[#E5E7EB]" : "bg-[#1F1F1F] text-[#E5E7EB]"} shadow-md`}>
               {msg.parts.map((part, j) =>
@@ -247,19 +278,21 @@ export default function ChatBox() {
                     <pre className="bg-[#1A1A1A] text-[#4ADE80] p-3 rounded-md overflow-x-auto whitespace-pre-wrap my-2 font-mono text-sm">
                       <code>{part.content}</code>
                     </pre>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute top-2 right-2 text-[#6B7280] hover:text-[#E5E7EB] relative"
-                      onClick={() => copyToClipboard(part.content, i)}
-                    >
-                      <Copy size={16} />
-                      {copiedIndex === i && (
-                        <span className="absolute top-8 right-0 bg-[#2D2D2D] text-[#E5E7EB] text-xs px-2 py-1 rounded-md shadow">
-                          Copied!
-                        </span>
-                      )}
-                    </Button>
+                    {msg.role === "assistant" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="absolute top-2 right-2 text-[#6B7280] hover:text-[#E5E7EB] relative"
+                        onClick={() => copyToClipboard(part.content, i)}
+                      >
+                        <Copy size={16} />
+                        {copiedIndex === i && (
+                          <span className="absolute top-8 right-0 bg-[#2D2D2D] text-[#E5E7EB] text-xs px-2 py-1 rounded-md shadow">
+                            Copied!
+                          </span>
+                        )}
+                      </Button>
+                    )}
                   </div>
                 ) : (
                   <p key={j} className="text-[#E5E7EB] whitespace-pre-wrap break-words">{part.content}</p>
@@ -268,26 +301,65 @@ export default function ChatBox() {
             </div>
           </motion.div>
         ))}
-        {loading && <p className="text-[#6B7280] text-center">44 is cooking...</p>}
-        {error && <p className="text-[#F87171] text-center">{error}{error.includes("full") ? ". Click + to create a new chat." : ""}</p>}
+        {loading && (
+          <motion.p
+            className="text-[#6B7280] text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            44 is cooking...
+          </motion.p>
+        )}
+        {error && (
+          <motion.p
+            className="text-[#F87171] text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            {error}{error.includes("full") ? ". Click + to create a new chat." : ""}
+          </motion.p>
+        )}
       </div>
-      <div className="p-4 border-t border-[#2D2D2D] flex items-center gap-3 bg-[#0A0A0B]">
-        <Button onClick={handleNewChat} variant="ghost" size="icon" className="text-[#E5E7EB] hover:bg-[#2D2D2D] rounded-full">
-          <Plus size={20} />
-        </Button>
+      <motion.div
+        className="p-4 border-t border-[#2D2D2D] bg-[#0A0A0B] relative"
+        variants={textareaVariants}
+        initial="initial"
+        animate={content ? "focus" : "initial"}
+      >
         <Textarea
           ref={textareaRef}
-          className="flex-1 bg-[#1F1F1F] text-[#E5E7EB] border-[#2D2D2D] placeholder-[#6B7280] focus:border-[#4B5563] rounded-lg resize-none"
+          className="flex-1 bg-[#1F1F1F] text-[#E5E7EB] border-[#2D2D2D] placeholder-[#6B7280] focus:border-[#4B5563] rounded-lg resize-none h-20 max-h-32 overflow-y-auto pr-20"
           placeholder="Type a message..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
           disabled={loading}
           onKeyDown={handleKeyDown}
         />
-        <Button onClick={handleSubmit} disabled={loading || !content.trim()} size="icon" className="bg-[#2D2D2D] text-[#E5E7EB] hover:bg-[#4B5563] rounded-full">
-          <Send size={16} />
-        </Button>
-      </div>
+        <div className="absolute right-6 top-1/2 transform -translate-y-1/2 flex gap-2">
+          <motion.div variants={buttonVariants} initial="initial" whileHover="hover" whileTap="tap">
+            <Button
+              onClick={handleNewChat}
+              variant="ghost"
+              size="icon"
+              className="text-[#E5E7EB] hover:bg-[#2D2D2D] rounded-full"
+            >
+              <Plus size={20} />
+            </Button>
+          </motion.div>
+          <motion.div variants={buttonVariants} initial="initial" whileHover="hover" whileTap="tap">
+            <Button
+              onClick={handleSubmit}
+              disabled={loading || !content.trim()}
+              size="icon"
+              className="bg-[#2D2D2D] text-[#E5E7EB] hover:bg-[#4B5563] rounded-full"
+            >
+              <Send size={16} />
+            </Button>
+          </motion.div>
+        </div>
+      </motion.div>
     </motion.div>
   );
 }
